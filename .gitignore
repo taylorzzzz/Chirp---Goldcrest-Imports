@@ -1,0 +1,6 @@
+# Everything...
+*
+
+# except:
+!.gitignore
+!import_to_woo.py
