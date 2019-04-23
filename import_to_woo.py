@@ -10,8 +10,13 @@ import csv
 #   Music of the Spheres
 #   WineSkin
 
-def getCategories(input_row):
 
+
+# For each product, this function will map the Goldcrest-assigned categories 
+# to categories that Chirp is using in Woo. This should include subcategories.
+def getCategories(input_row):    
+
+    # Get the categories (max of 4) from the input product
     cat1 = int(input_row[24]) if input_row[24] else input_row[24]
     cat2 = int(input_row[25]) if input_row[25] else input_row[25]
     cat3 = int(input_row[26]) if input_row[26] else input_row[26]
@@ -21,51 +26,114 @@ def getCategories(input_row):
 
     output_categories = []
 
-    accessories = [100, 106, 108, 117, 134, 135, 136, 139, 149, 153, 159, 169, 173, 177, 185, 193, 194, 195, 196, 229, 250, 253, 257, 258, 436]
-    bird_baths = [107, 139, 230, 254]
-    bird_feeders = [110, 140, 147, 157, 175, 182, 198, 200]
-    nyjer_feeder = [199]
-    bird_houses = [113, 204, 221]
-    bird_seed = [241, 242, 176, 148, 249]
-    bird_watching = [161]
-    binoculars = [161]
-    books = [115, 116]
-    critters = [103, 181, 277]
-    gifts = [120, 122, 125, 128, 130, 131, 133, 136, 137, 141, 142, 143, 144, 145, 150, 152, 155, 
-            158, 160, 164, 166, 168, 171, 178, 181, 190, 202, 203, 207, 213, 245, 264, 412, 413]
+    categories = {
+        "accessories": {
+            "keys": [100, 106, 108, 117, 134, 135, 136, 139, 149, 153, 159, 169, 173, 177, 185, 193, 194, 195, 196, 229, 250, 253, 257, 258, 436],
+            "subcategories": {
+                "flags": {
+                    "keys": [136],
+                    "chirp subcategory": "Flags"
+                }
+            },
+            "chirp category": "Accessories"
+        },
+        "bird baths": {
+            "keys": [107, 139, 230, 254],
+            "subcategories": {
+                "": {
+                    "keys": [],
+                    "chirp subcategory": ""
+                }
+            },
+            "chirp category": "Bird Baths"
+        },
+        "bird feeders": {
+            "keys": [110, 140, 147, 157, 175, 182, 198, 199, 200],
+            "subcategories": {
+                "nyjer feeder": {
+                    "keys": [199],
+                    "chirp subcategory": "Nyjer Thistle"
+                }
+            },
+            "chirp category": "Bird Feeders"
+        },
+        "bird houses": {
+            "keys": [113, 204, 221],
+            "subcategories": {
+                "": {
+                    "keys": [],
+                    "chirp subcategory": ""
+                }
+            },
+            "chirp category": "Bird Houses"
+        },
+        "bird seed": {
+            "keys": [241, 242, 176, 148, 249],
+            "subcategories": {
+                "": {
+                    "keys": [],
+                    "chirp subcategory": ""
+                }
+            },
+            "chirp category": "Bird Seed & Foods"
+        },
+        "bird watching": {
+            "keys": [161],
+            "subcategories": {
+                "binoculars": {
+                    "keys": [],
+                    "chirp subcategory": "Binoculars"
+                }
+            },
+            "chirp category": "Bird Watching"
+        },
+        "books": {
+            "keys": [115, 116],
+            "subcategories": {
+                "": {
+                    "keys": [],
+                    "chirp subcategory": ""
+                }
+            },
+            "chirp category": "Books"
+        },
+        "critters": {
+            "keys": [103, 181, 277],
+            "subcategories": {
+                "": {
+                    "keys": [],
+                    "chirp subcategory": ""
+                }
+            },
+            "chirp category": "Critters"
+        },
+        "gifts": {
+            "keys": [120, 122, 125, 128, 130, 131, 133, 136, 137, 141, 142, 143, 144, 145, 150, 152, 155, 
+            158, 160, 164, 166, 168, 171, 178, 181, 190, 202, 203, 207, 213, 245, 264, 412, 413],
+            "subcategories": {
+                "": {
+                    "keys": [],
+                    "chirp subcategory": ""
+                }
+            },
+            "chirp category": "Gifts"
+        }
+    }
 
-    for cat in input_cats:
-        # Accessories
-        if cat in accessories:
-            output_categories.append('Accessories')
-        # Bird Baths
-        elif cat in bird_baths:
-            output_categories.append('Bird Baths')
-        # Bird Feeders
-        elif cat in bird_feeders:
-            output_categories.append('Bird Feeders')
-            if cat in nyjer_feeder:
-                output_categories.append('Bird Feeders > Nyjer Thistle')
-        # Bird Houses
-        elif cat in bird_houses:
-            output_categories.append('Bird Houses')
-        # Bird Seed & Foods
-        elif cat in bird_seed:
-            output_categories.append('Bird Seed & Foods')
-        # Bird Watching
-        elif cat in bird_watching:
-            output_categories.append('Bird Watching')
-            if cat in binoculars:
-                output_categories.append('Bird Watching > Binoculars')
-        # Books
-        elif cat in books:
-            output_categories.append('Books')
-        # Critters
-        elif cat in critters:
-            output_categories.append('Critters')
-        # Gifts
-        elif cat in gifts:
-            output_categories.append('Gifts')
+
+    for input_cat in input_cats:
+        # Loop through the Categories dictionary
+        for category_key in categories:
+            category_dict = categories[category_key]
+            # For each category, loop through it's subcategories
+            for subcat_key in category_dict["subcategories"]:
+                subcat_dict = category_dict["subcategories"][subcat_key]
+                # For each subcategory, check if input_cat is in the list of keys
+                if input_cat in subcat_dict["keys"]:
+                    # The input category maps to this subcategory so append that subcat string to list
+                    output_categories.append( category_dict["chirp category"] + " > " + subcat_dict["chirp subcategory"] )
+                    # Also append the parent, root category to the list
+                    output_categories.append( category_dict["chirp category"] )
 
     # Next we need to remove duplicate elements
     output_categories = list( set( output_categories ) )
@@ -116,9 +184,8 @@ output_headers = ['line', 'qty_ordered', 'qty_available', 'vendor_minimum', 'ven
                     'where_sold', 'dropshipable', 'weight_each_oz', '', 'dimensions', 'product_category',
                     'relevant_product_keywords_or_tags', 'regular_retail_price', 'wholesale_price_each', 'shipping_cost_each',
                     'total_cost_each', 'multiplier', 'working _sales_price', 'map', 'chirp_retail_price', 'chirp_part_num',
-                    # Columns I have added to the spreadsheet
                     'product_width_in', 'product_height_in', 'product_depth_in', 'image_urls']
-# The list which are rows/lists will be written to
+# The list which rows/lists will be written to
 output_list = []
 
 # Next we need to go through each row in the input list and for each create a corresponding row for the output row
