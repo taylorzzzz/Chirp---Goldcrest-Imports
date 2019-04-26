@@ -378,6 +378,226 @@ def getPrice(price, map):
     
     return map
 
+# This function takes a title in the form of "Cool Thing Wow" and outputs "cool_thing_wow"
+def getPostName(inputName):
+    if not inputName:
+        return inputName
+    
+    post_name = inputName.lower()
+
+    post_name = post_name.replace(" ", "-")
+
+    return post_name
+
+# This function maps the input list (from Goldcrest) to an output list that will be 
+# written to a csv file which can then be imported to Chirp's Master sheet
+def mapToChirp(input_list):
+
+    # Table of relavant input columns for GOLDCREST -> CHIRP MASTER
+
+    # Input Column #    Input Column                Output #
+    # 15                Minimum Case QTY            3
+    # 0                 Manufacturers               4 
+    # 1                 Products ItemNo             5 
+    # 4                 Products UPC                6
+    # 2                 Products Name               7
+    # 3                 Descriptions                8 & 9
+    # y                 Dropshippable               11
+    # 5                 Products Weight             12  *convert to oz
+    # 24                Products Category 1         15
+    # 25                Products Category 2         15
+    # 26                Products Category 3         15
+    # 27                Products Category 4         15
+    # 14                Suggested_Retail_Price      17
+    # 13                Products Wholesale Price    18
+    # 12                Products Map Price          23
+    # 14                Chirp Retail Price          24
+    # 10                Actual_Item_Width           26
+    # 9                 Actual_Item_Height          27
+    # 11                Actual_Item_Depth           28
+    # 19                Products Image              29  *change to absolute URL using Manufacturer + Products Image
+
+
+    # Hard code the columns of the output - which are the same columns used for the Chirp spreadsheet
+    output_headers = ['line', 'qty_ordered', 'qty_available', 'vendor_minimum', 'vendor', 'sku/vendor_part_num', 'upc',
+                        'name', 'full_detailed_product_description', 'short_summary/overview_product_description',
+                        'where_sold', 'dropshipable', 'weight_each_oz', '', 'dimensions', 'product_category',
+                        'relevant_product_keywords_or_tags', 'regular_retail_price', 'wholesale_price_each', 'shipping_cost_each',
+                        'total_cost_each', 'multiplier', 'working _sales_price', 'map', 'chirp_retail_price', 'chirp_part_num',
+                        'product_width_in', 'product_height_in', 'product_depth_in', 'image_urls']
+    # The list which rows/lists will be written to
+    output_list = []
+
+    # Next we need to go through each row in the input list and for each create a corresponding row for the output row
+    i = 0
+
+    for input_row in input_list:
+
+        if i == 0:
+            # add output_headers to output_list (as the first row)
+            output_list.append(output_headers)
+        else:
+            # Initialize row with empty values - Only some of the elements in this list will be given actual values
+            output_row = [""] * len(output_headers)
+
+            # Note: not every field in the output file needs to have a value. For instance, line, Qty Ordered etc.
+            # We'll do these in the order in which they appear in the output file i.e Vendor Minimum (3), Vendor (4) etc.
+
+            # Vender Minimum
+            output_row[3] = input_row[15]
+
+            # Vendor
+            output_row[4] = input_row[0]
+
+            # SKU 
+            output_row[5] = input_row[1]
+
+            # UPC
+            output_row[6] = input_row[4]
+
+            # Name 
+            output_row[7] = input_row[2]
+
+            # Short & Full Description - Goldcrest only provides one description
+            output_row[8] = input_row[3]
+            output_row[9] = input_row[3]
+
+            # Dropshippable 
+            output_row[11] = 'y'
+
+            # Weight - Convert from lbs to oz
+            output_row[12] = float(input_row[5]) * 16
+
+            # Category
+            output_row[15] = getCategories(input_row)
+
+            # Retail Price
+            output_row[17] = getPrice(input_row[14], input_row[12])
+
+            # Wholesale Price
+            output_row[18] = input_row[13]
+
+            # MAP Price
+            output_row[23] = input_row[12]
+
+            # Width
+            output_row[26] = input_row[10]
+
+            # Height
+            output_row[27] = input_row[9]
+
+            # Depth
+            output_row[28] = input_row[11]
+
+            # Image(s)
+            image_url = "https://chirpforbirds.com/Product_Images/" + input_row[0] + "/" + input_row[19]
+            output_row[29] = image_url.replace(',', '')
+
+            #finally append this row to the output_list
+            output_list.append(output_row)
+
+
+        i += 1
+
+    return output_list
+
+# This function maps the input list from Goldcrest to an output list that will
+# be written to a csv file which can then be imported to Woo
+def mapToWoo(input_list):
+    # Table of relavant input columns for GOLDCREST -> Woo
+
+    # SKU - 
+    # Name - 
+    # Published - 2
+    # Visibility in catalog	- visible
+    # Short description - 
+    # Description - 
+    # Tax status - taxable
+    # Weight (oz)
+    # Length (in)
+    # Width (in) 
+    # Height (in)
+    # Allow customer reviews?
+    # Regular price
+    # Categories
+    # Images
+    
+
+    output_headers = ['SKU', 'Name', 'Published', 'Visibility in catalog', 'Short description', 'Description', 'Tax status',
+                        'Weight (oz)', 'Length (in)', 'Width (in)', 'Height (in)', 'Allow customer reviews?', 'Regular price', 
+                        'Categories', 'Images']
+    # The list which rows/lists will be written to
+    output_list = []
+
+    # Next we need to go through each row in the input list and for each create a corresponding row for the output row
+    i = 0
+
+    for input_row in input_list:
+
+        if i == 0:
+            # add output_headers to output_list (as the first row)
+            output_list.append(output_headers)
+        else:
+            # Initialize row with empty values - Only some of the elements in this list will be given actual values
+            output_row = [""] * len(output_headers)
+
+            # Note: not every field in the output file needs to have a value. For instance, tax_class etc.
+            # We'll do these in the order in which they appear in the output file
+
+            # SKU
+            output_row[0] = input_row[4]
+
+            # Name
+            output_row[1] = input_row[2]
+
+            # Published 
+            output_row[2] = "1"
+
+            # Visibility in catalog
+            output_row[3] = "visible"
+
+            # Short description 
+            output_row[4] = input_row[3]
+
+            # Description
+            output_row[5] = input_row[3]
+
+            # Tax status 
+            output_row[6] = "taxable"
+
+            # Weight (oz) 
+            output_row[7] = float(input_row[5]) * 16
+            
+            # Length (in)
+            output_row[8] = input_row[11]
+
+            # Width (in)
+            output_row[9] = input_row[10]
+
+            # Height (in)
+            output_row[10] = input_row[9]
+
+            # Allow customer reviews?
+            output_row[11] = "1"
+
+            # Regular price
+            output_row[12] = getPrice(input_row[14], input_row[12])
+
+            # Categories
+            output_row[13] = getCategories(input_row)
+
+            # Images
+            image_url = "https://chirpforbirds.com/Product_Images/" + input_row[0] + "/" + input_row[19]
+            output_row[14] = image_url.replace(',', '')
+
+            #finally append this row to the output_list
+            output_list.append(output_row)
+
+
+        i += 1
+
+    return output_list
+
 
 
 input_file = open('input.csv', 'r')
@@ -386,113 +606,14 @@ input_reader = csv.reader(input_file, delimiter=',')
 
 input_list = list(input_reader)
 
-# Table of relavant input columns
+chirp_output_list = mapToChirp(input_list)
 
-# Input Column #    Input Column                Output #
-# 15                Minimum Case QTY            3
-# 0                 Manufacturers               4 
-# 1                 Products ItemNo             5 
-# 4                 Products UPC                6
-# 2                 Products Name               7
-# 3                 Descriptions                8 & 9
-# y                 Dropshippable               11
-# 5                 Products Weight             12  *convert to oz
-# 24                Products Category 1         15
-# 25                Products Category 2         15
-# 26                Products Category 3         15
-# 27                Products Category 4         15
-# 14                Suggested_Retail_Price      17
-# 13                Products Wholesale Price    18
-# 12                Products Map Price          23
-# 14                Chirp Retail Price          24
-# 10                Actual_Item_Width           26
-# 9                 Actual_Item_Height          27
-# 11                Actual_Item_Depth           28
-# 19                Products Image              29  *change to absolute URL using Manufacturer + Products Image
+woo_output_list = mapToWoo(input_list)
 
-
-# Hard code the columns of the output - which are the same columns used for the Chirp spreadsheet
-output_headers = ['line', 'qty_ordered', 'qty_available', 'vendor_minimum', 'vendor', 'sku/vendor_part_num', 'upc',
-                    'name', 'full_detailed_product_description', 'short_summary/overview_product_description',
-                    'where_sold', 'dropshipable', 'weight_each_oz', '', 'dimensions', 'product_category',
-                    'relevant_product_keywords_or_tags', 'regular_retail_price', 'wholesale_price_each', 'shipping_cost_each',
-                    'total_cost_each', 'multiplier', 'working _sales_price', 'map', 'chirp_retail_price', 'chirp_part_num',
-                    'product_width_in', 'product_height_in', 'product_depth_in', 'image_urls']
-# The list which rows/lists will be written to
-output_list = []
-
-# Next we need to go through each row in the input list and for each create a corresponding row for the output row
-i = 0
-
-for input_row in input_list:
-
-    if i == 0:
-        # add output_headers to output_list (as the first row)
-        output_list.append(output_headers)
-    else:
-        # Initialize row with empty values - Only some of the elements in this list will be given actual values
-        output_row = [""] * len(output_headers)
-
-        # Note: not every field in the output file needs to have a value. For instance, line, Qty Ordered etc.
-        # We'll do these in the order in which they appear in the output file i.e Vendor Minimum (3), Vendor (4) etc.
-
-        # Vender Minimum
-        output_row[3] = input_row[15]
-
-        # Vendor
-        output_row[4] = input_row[0]
-
-        # SKU 
-        output_row[5] = input_row[1]
-
-        # UPC
-        output_row[6] = input_row[4]
-
-        # Name 
-        output_row[7] = input_row[2]
-
-        # Short & Full Description - Goldcrest only provides one description
-        output_row[8] = input_row[3]
-        output_row[9] = input_row[3]
-
-        # Dropshippable 
-        output_row[11] = 'y'
-
-        # Weight - Convert from lbs to oz
-        output_row[12] = float(input_row[5]) * 16
-
-        # Category
-        output_row[15] = getCategories(input_row)
-
-        # Retail Price
-        output_row[17] = getPrice(input_row[14], input_row[12])
-
-        # Wholesale Price
-        output_row[18] = input_row[13]
-
-        # MAP Price
-        output_row[23] = input_row[12]
-
-        # Width
-        output_row[26] = input_row[10]
-
-        # Height
-        output_row[27] = input_row[9]
-
-        # Depth
-        output_row[28] = input_row[11]
-
-        # Image(s)
-        image_url = "https://chirpforbirds.com/Product_Images/" + input_row[0] + "/" + input_row[19]
-        output_row[29] = image_url.replace(',', '')
-
-        #finally append this row to the output_list
-        output_list.append(output_row)
-
-
-    i += 1
-
-
-with open('output.csv', 'w') as writeFile:
+with open('chirp_output.csv', 'w') as writeFile:
     writer = csv.writer( writeFile )
-    writer.writerows( output_list )
+    writer.writerows( chirp_output_list )
+
+with open('woo_output.csv', 'w') as writeFile:
+    writer = csv.writer( writeFile )
+    writer.writerows( woo_output_list )
